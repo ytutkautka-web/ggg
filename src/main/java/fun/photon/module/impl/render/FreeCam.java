@@ -19,6 +19,11 @@ public class FreeCam extends Module implements IMinecraft {
     private float yaw, pitch;
     private long lastFrameNanos = -1;
 
+    // Клиентский клон-игрок: остаётся стоять на месте вашего тела, пока камера летает.
+    // Существует ТОЛЬКО на клиенте — сервер о нём не знает и никаких пакетов не получает.
+    private static final int CLONE_ENTITY_ID = -1337_1337;
+    private net.minecraft.client.player.RemotePlayer clone;
+
     public boolean isActive() {
         return isEnabled() && mc.player != null;
     }
@@ -39,6 +44,41 @@ public class FreeCam extends Module implements IMinecraft {
         yaw = mc.player.getYRot();
         pitch = mc.player.getXRot();
         lastFrameNanos = -1;
+
+        spawnClone();
+    }
+
+    @Override
+    protected void onDisable() {
+        removeClone();
+    }
+
+    private void spawnClone() {
+        if (mc.level == null || mc.player == null) return;
+        try {
+            clone = new net.minecraft.client.player.RemotePlayer(mc.level, mc.player.getGameProfile());
+            clone.setId(CLONE_ENTITY_ID);
+            clone.copyPosition(mc.player);
+            clone.setYBodyRot(mc.player.getYRot());
+            clone.setYHeadRot(mc.player.getYHeadRot());
+            clone.setOldPosAndRot();
+            // копируем экипировку, чтобы клон выглядел как вы
+            for (net.minecraft.world.entity.EquipmentSlot slot : net.minecraft.world.entity.EquipmentSlot.values()) {
+                clone.setItemSlot(slot, mc.player.getItemBySlot(slot).copy());
+            }
+            mc.level.addEntity(clone);
+            System.out.println("[Photon] FreeCam clone spawned at " + clone.position());
+        } catch (Throwable t) {
+            System.out.println("[Photon] FreeCam clone spawn failed: " + t);
+            clone = null;
+        }
+    }
+
+    private void removeClone() {
+        if (clone != null && mc.level != null) {
+            mc.level.removeEntity(clone.getId(), net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
+        }
+        clone = null;
     }
 
     // Вызывается из Camera.setup() каждый КАДР рендера (а не игровой тик 20/сек) —
