@@ -31,6 +31,7 @@ public class FreeCam extends Module implements IMinecraft {
 
     @Override
     protected void onEnable() {
+        System.out.println("[Photon] FreeCam v2 enabled (camera-detach build)");
         if (mc.player == null) return;
         x = mc.player.getX();
         y = mc.player.getY() + mc.player.getEyeHeight();
