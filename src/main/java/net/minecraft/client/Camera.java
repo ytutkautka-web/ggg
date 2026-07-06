@@ -195,7 +195,7 @@ public class Camera implements TrackedWaypoint.Camera {
     }
 
     public boolean isDetached() {
-        return this.detached;
+        return this.detached || fun.photon.hook.Hooks.freeCamActive();
     }
 
     public EnvironmentAttributeProbe attributeProbe() {

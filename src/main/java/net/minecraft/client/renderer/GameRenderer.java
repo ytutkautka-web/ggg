@@ -431,6 +431,7 @@ public class GameRenderer implements TrackedWaypoint.Projector, AutoCloseable {
             if (this.minecraft.options.getCameraType().isFirstPerson()
                 && !p_408020_
                 && !this.minecraft.options.hideGui
+                && !fun.photon.hook.Hooks.freeCamActive()
                 && this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
                 this.itemInHandRenderer
                     .renderHandsWithItems(
