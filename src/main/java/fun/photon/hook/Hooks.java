@@ -161,7 +161,8 @@ public final class Hooks {
     public static fun.photon.module.impl.render.FreeCam freeCam() {
         try {
             return Photon.getInstance().getModuleManager().getModule(fun.photon.module.impl.render.FreeCam.class);
-        } catch (Throwable ignored) {
+        } catch (Throwable t) {
+            System.out.println("[Photon] freeCam() lookup failed: " + t);
             return null;
         }
     }

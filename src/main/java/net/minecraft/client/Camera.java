@@ -101,12 +101,19 @@ public class Camera implements TrackedWaypoint.Camera {
         }
 
         fun.photon.module.impl.render.FreeCam freeCam = fun.photon.hook.Hooks.freeCam();
+        if (System.nanoTime() - lastFreeCamDebugNanos > 2_000_000_000L) {
+            lastFreeCamDebugNanos = System.nanoTime();
+            System.out.println("[Photon] Camera.setup hook alive; freeCam="
+                + (freeCam == null ? "null" : (freeCam.isActive() ? "ACTIVE" : "off")));
+        }
         if (freeCam != null && freeCam.isActive()) {
             freeCam.syncFrame();
             this.setRotation(freeCam.getYaw(), freeCam.getPitch());
             this.setPosition(freeCam.getX(), freeCam.getY(), freeCam.getZ());
         }
     }
+
+    private static long lastFreeCamDebugNanos = 0L;
 
     public void tick() {
         if (this.entity != null) {
